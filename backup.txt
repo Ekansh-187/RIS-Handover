@@ -1,0 +1,360 @@
+UE
+
+import random
+from math import fabs
+from typing import List
+
+import environment
+from eNB import eNB
+from utils.Ticker import Ticker
+
+
+class UE:
+    """Defines user entity in the environment"""
+
+    def __init__(self, loc, pause=100):
+        self.dirX = 1  # 0 - Towards 0, 1 - Away from
+        self.dirY = 1
+        self.nearby_bs = []
+        self.HO_total = 0
+        self.HO_success = [0]
+        self.HO_failure = [0]
+        self.associated_eNB = None
+        self.upcoming_eNB = None
+        self.velocity = 0
+        self.time_at_destination = 0
+        self.x = loc[0]
+        self.y = loc[1]
+        self.id = random.randint(0, 1000)
+        self.pause_time = pause
+        self.waypoint = loc[0]
+        self.destinations = []
+
+    def set_eNB(self, associated_eNB):
+        self.associated_eNB = associated_eNB
+
+    def get_eNB(self) -> eNB:
+        return self.associated_eNB
+
+    def get_upcoming_eNB(self) -> eNB:
+        return self.upcoming_eNB
+
+    def set_upcoming_eNB(self, upcoming_eNB):
+        self.upcoming_eNB = upcoming_eNB
+
+    def get_id(self):
+        return self.id
+
+    def get_location(self):
+        return (self.x, self.y)
+
+    def set_location(self, loc):
+        self.x = loc[0]
+        self.y = loc[1]
+
+    def set_nearby_bs(self, nearby_bs: List[eNB]):
+        self.nearby_bs = nearby_bs
+
+    def get_nearby_bs(self):
+        return self.nearby_bs
+
+    def set_direction(self, direction):
+        self.dirX = direction[0]
+        self.dirY = direction[1]
+
+    def set_HO_success(self, type_ho):
+        self.HO_total += 1
+        self.HO_success[0] += 1
+
+    def get_HO_success(self):
+        return self.HO_success
+
+    def get_HO_failure(self):
+        return self.HO_failure
+
+    def get_HO_total(self):
+        return self.HO_total
+
+    def set_HO_failure(self, type_ho):
+        self.HO_total += 1
+        self.HO_failure[0] += 1
+
+    def set_velocity(self, velocity):
+        self.velX = velocity[0]
+        self.velY = velocity[1]
+
+    def __str__(self):
+        return "UE located at %s" % (self.x,self.y)
+
+    def move(self,ticker):  # Move the UE in the environment per millisecond(default)
+        self.x += self.dirX * self.velX * ticker.ticker_duration
+        self.y = self.dirY*self.velY*ticker.ticker_duration
+        ticker.tick()
+
+    # def find_closest_bs(self):
+    #     return min(
+    #         self.nearby_bs,
+    #         key=lambda bs: math.fabs(self.get_location() - bs.get_location()),
+    #     )
+
+    # def generate_random_motion(self, constant=None):
+    #     if constant is None:
+    #         self.set_velocity(random.randint(0, 100))
+    #         self.set_direction(random.randint(-1, 1))
+    #         self.move()
+    #     if constant == "v":
+    #         self.set_direction(random.randint(-1, 1))
+    #         self.move()
+    #     if constant == "d":
+    #         self.set_velocity(random.randint(-1, 100))
+    #         self.move()
+    #     if constant == "vd":
+    #         self.move()
+
+    def get_bs_ris_signal():
+        pass
+    def get_bs_signal():
+        pass
+    
+    def get_min_max_bounds(self):
+        """
+        This function returns the minimum and maximum bounds on the destination selection for waypoint mobility
+        """
+        if self.x < 1000 and self.y < 1000:
+            min_bound = (0,0)
+            max_bound = (self.x + 1000, self.y+1000)
+        elif self.x > 49000 and self.x > 49000:
+            max_bound = (50000, 50000)
+            min_bound = (self.x - 1000, self.y - 1000)
+        else:
+            min_bound = (self.x - 1000, self.y - 1000)
+            max_bound = (self.x + 1000, self.y + 1000)
+
+        return min_bound, max_bound
+
+    def get_handover_type(self):
+            return 3
+
+    def update_UE_location(self, ticker: Ticker):
+        """
+        This function is responsible for random motion of the UE using the random waypoint model
+        """
+        # If it is time for the UE to start moving to the next destination, choose a new destination
+        if (fabs(self.location) >= fabs(self.waypoint) and self.dirY == 1) or \
+                (fabs(self.location) <= fabs(self.waypoint) and self.direction == -1):
+            # Choose a new destination between 0 and 50000 meters
+            self.waypoint = random.uniform((self.get_min_max_bounds()[0]),
+                                           self.get_min_max_bounds()[1])
+            # Set the time at which the UE will start moving to the next destination
+            self.pause_time = random.randint(environment.MIN_PAUSE, environment.MAX_PAUSE)
+            ticker.time = ticker.time + self.pause_time
+            # Choose a new random speed between 10 and 50 meters per second (m/s) equivalent to 0.01 and 0.05 m/ms
+            self.velocity = random.uniform(environment.MIN_SPEED, environment.MAX_SPEED)
+            # Choose a new direction of movement based on the relative positions of the current location and the
+            # destination
+            if self.waypoint > self.location:
+                self.direction = 1  # Move forwards
+            else:
+                self.direction = -1  # Move backwards
+        # Update the UE's location based on its speed, direction, and the elapsed time
+        self.move(ticker)
+
+
+
+eNB
+import math
+import random
+
+import environment
+import utils
+import utils.misc
+
+
+class eNB:
+    """
+    This class defines properties of a base station.
+    It has a location, id, type and wavelength.
+    """
+
+    def __init__(self, loc, bs_type):
+        self.free_elems = 10
+        self.id = random.randint(0, 1000)
+        self.x = loc[0]
+        self.y = loc[1]
+        self.bs_type = bs_type  # "nr" or "ris"
+        if self.bs_type == "nr":
+            self.wavelength = utils.misc.freq_to_wavelength(environment.FREQ_NR)
+        elif self.bs_type == "ris":
+            self.wavelength = utils.misc.freq_to_wavelength(environment.FREQ_NR)
+
+    def __str__(self):
+        return "eNB located at %s of type: %s" % (self.location, self.bs_type)
+
+    def get_location(self):
+        return (self.x, self.y)
+
+    def get_id(self):
+        return self.id
+
+    def get_type(self):
+        return self.bs_type
+
+    def set_location(self, loc):
+        self.x = loc[0]
+        self.y = loc[1]
+
+    def calc_RSRP(self, ueLocation):
+        """
+        This function calculates the Received Signal Strength of the base station in dB
+        This value is calculated using the Friis equation, i.e. RSS = Ptx - Gtx - Grx - L
+        :param ueLocation: Location of the UE
+        :return: RSRP(Reference Signal Received Power ) in dBm
+
+        Here it is assumed that Gtx = Grx = 0 dB (Gains of the transmitter and receiver)
+        """
+
+        pt = utils.misc.calc_power_in_dbm(environment.PTX)
+
+        if self.x != ueLocation[0] or self.y != ueLocation[1]:
+            rsrp = pt - (20 * math.log10(
+                4 * math.pi * math.fabs((self.x - ueLocation[0])**2 + (self.y-ueLocation[1])**2) /
+                self.wavelength))
+        else:
+            rsrp = 0
+        # print("ID: %s, Location: %s, RSRP: %s" % (self.id, self.location, rsrp))
+        return rsrp
+
+
+eNB_environment
+from eNB import eNB
+
+# Mix Environment
+en1_3 = eNB((5000, 2000), "nr")
+en1_4 = eNB((15000, 5000), "nr")
+en1_5 = eNB((25000,15000), "nr")
+en1_6 = eNB((20000,10000), "nr")
+en1_8 = eNB((45000,50000), "nr")
+en1_9 = eNB((10000,20000), "nr")
+en1_10 = eNB((12000,5000), "nr")
+eNBs_mix1 = ("NR-LTE-Mix1", [en1_3, en1_4, en1_5, en1_6, en1_8, en1_9, en1_10])
+
+
+
+# NR Environment
+en3_1 = eNB((5000, 2000), "nr")
+en3_2 = eNB((15000, 5000), "nr")
+en3_3 = eNB((25000,15000), "nr")
+en3_4 = eNB((35000, 10000), "nr")
+en3_5 = eNB((45000, 50000), "nr")
+eNBs_nr = ("NR", [en3_1, en3_2, en3_3, en3_4])
+
+
+simulate_ue
+import math
+from typing import List
+
+import environment
+from UE import UE
+from eNB import eNB
+from utils.Result import Result
+from utils.Ticker import Ticker
+
+
+class Simulate_UE:
+    """This class defines an environment for the simulator"""
+
+    def __init__(self, ue: UE, e_nbs: List[eNB]):
+        self.Ticker = Ticker()
+        self.ue = ue
+        self.e_nbs = e_nbs
+        self.ho_active = False
+        self.ho_trigger_time = -1
+
+    def run(self, t: Ticker, time=10000):
+        self.Ticker = t
+        self.discover_bs()
+        self.associate_ue_with_bs()
+        result = self.trigger_motion(time)
+        return Result(result[0], result[1], timeOfExecution=time)
+
+    def search_for_bs(self):
+        nearby_bs = []
+        for e_nb in self.e_nbs:
+            dist = math.fabs((self.ue.get_location()[0] - e_nb.get_location()[0])**2 + ((self.ue.get_location()[1] - e_nb.get_location()[1])**2))
+            if dist <= 20000:
+                nearby_bs.append(e_nb)
+        return nearby_bs
+
+    def associate_ue_with_bs(self):
+        """
+        This function associates the UE with the base station, it also checks if the UE is in range of the base station,
+        if it is then it keeps a record of the eNB in the list of eNBs
+        """
+        nearby_bs = self.search_for_bs()
+        if len(nearby_bs) == 0:
+            print("UE %s is out of range" % self.ue.get_id())
+            return Exception("UE is out of range")
+        sorted_nearby_bs = sorted(nearby_bs, key=lambda x: x.calc_RSRP(self.ue.get_location()), reverse=True)
+        # TODO: add a minimum RSRP threshold to consider
+        # print sorted_nearby_bs with their RSRP
+        self.ue.set_eNB(sorted_nearby_bs[0])
+        self.ue.set_nearby_bs(nearby_bs)
+
+    def trigger_motion(self, time=1000000):
+        while self.Ticker.time < time:
+            if self.ho_active is True:
+                self.check_handover_completion()
+            self.ue.update_UE_location(self.Ticker)
+            self.check_for_handover()
+        print("Successful HOs [nr2nr]: %s" %
+              self.ue.get_HO_success())
+        print("Failed HOs [nr2nr]: %s" %
+              self.ue.get_HO_failure())
+        return [self.ue.get_HO_success(), self.ue.get_HO_failure()]
+
+    def check_for_handover(self):
+        """
+        Handover occurs when the UE is in area of another base station with higher RSRP for TTT
+        """
+        nearby_bs = self.ue.get_nearby_bs()
+        if len(nearby_bs) == 0:
+            self.ue.set_HO_failure(2)
+            print("UE %s is out of range" % self.ue.get_location())
+        else:
+            for e_nb in nearby_bs:
+                if e_nb.get_id() != self.ue.get_eNB().get_id():
+                    source_rsrp = self.ue.get_eNB().calc_RSRP(self.ue.get_location())
+                    target_rsrp = e_nb.calc_RSRP(self.ue.get_location())
+                    if target_rsrp > source_rsrp + environment.HYSTERESIS:
+                        if self.ho_active is False:
+                            self.ho_active = True
+                            self.ho_trigger_time = self.Ticker.time
+                            self.ue.set_upcoming_eNB(e_nb)
+                            # print("UE %s is in area of eNB %s" % (ue.get_id(), e_nb.get_id()))
+
+    def check_handover_completion(self):
+        if self.Ticker.time - self.ho_trigger_time >= environment.TTT:
+            target_rsrp = self.ue.get_upcoming_eNB().calc_RSRP(self.ue.get_location())
+            source_rsrp = self.ue.get_eNB().calc_RSRP(self.ue.get_location())
+            if  target_rsrp >= source_rsrp + environment.HYSTERESIS + environment.A3_OFFSET:
+                self.ho_active = False
+                self.ue.set_HO_success(self.ue.get_handover_type())
+                self.ue.set_eNB(self.ue.get_upcoming_eNB())
+                # print("UE %s is connected to eNB %s" % (self.ue.get_id(), self.ue.get_eNB().get_id()))
+                
+            else:
+                print("ho failure")
+                self.ue.set_HO_failure(self.ue.get_handover_type())
+                self.ho_active = False
+                # environment.ho_status.append(0)
+                # environment.rsrp.append(-target_rsrp)
+            environment.ho_status.append(self.ue.HO_success[0]/self.ue.HO_total)
+            environment.rsrp.append(-target_rsrp)
+            self.ue.set_upcoming_eNB(None)
+            self.ho_trigger_time = -1
+            self.associate_ue_with_bs()
+        else:
+            return
+
+    def discover_bs(self):
+        self.e_nbs.sort(key=lambda x: x.get_location())
