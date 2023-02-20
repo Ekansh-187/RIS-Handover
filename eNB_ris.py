@@ -14,20 +14,26 @@ class eNB_ris:
     It has a location, id, type and wavelength.
     """
 
-    def __init__(self, x, ut, bs_type):
+    def __init__(self, x, y, ut, bs_type="ris"):
         self.util = ut
+        self.x = x
+        self.y = y
         self.ris = None
         self.free_elems = 10
         self.id = random.randint(0, 1000)
         self.location = x
-        self.bs_type = bs_type  # "bs" or "bs-rs"
+        self.bs_type = bs_type
         self.wavelength = utils.misc.freq_to_wavelength(environment.FREQ_NR)
+        self.ris = None
 
     def __str__(self):
         return "eNB located at %s of type: %s" % (self.location, self.bs_type)
 
     def get_location(self):
         return self.location
+    
+    def get_location_2d(self):
+        return (self.x, self.y)
 
     def get_id(self):
         return self.id
@@ -44,26 +50,34 @@ class eNB_ris:
         
 
 
-    def power_received(self, ueLocation):
+
+
+
+    
+
+    def power_received(self, ueX, ueY):
         pt = utils.misc.calc_power_in_dbm(environment.PTX)
         pr_nr = pt
-        if(math.fabs(ueLocation-self.location) > 1):
-            pr_nr /= math.fabs(ueLocation - self.location)            
+        dist = utils.misc.calc_dist(self.x, self.y, ueX, ueY)
+        if (dist > 1):
+            pr_nr /= dist
         return pr_nr
 
+    def P_ris(self, ueX, ueY):
+        if (self.bs_type == "nr"):
+            return self.power_received(ueX, ueY)
 
-
-    def P_ris(self, ueLocation):
         ris = self.ris
         if ris is None:
-            return Exception("BS not associated with ris")
+            return self.power_received(ueX, ueY)
         pt = utils.misc.calc_power_in_dbm(environment.PTX)
         pr_at_ris = pt
-        if (math.fabs(ris.get_location()-self.location) > 1):
-            pr_at_ris /= math.fabs(ris.get_location() - self.location)
+        dist = utils.misc.calc_dist(self.x, self.y, ueX, ueY)
+        if (dist > 1):
+            pr_at_ris /= dist
 
         pr_ris = 0.7*pr_at_ris
-            
-        return self.power_received(ueLocation)+ pr_ris
+
+        return self.power_received(ueX, ueY) + pr_ris
 
 

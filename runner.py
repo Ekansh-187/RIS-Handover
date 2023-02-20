@@ -1,7 +1,6 @@
 import environment,  eNB_environments
 import main, matplotlib.pyplot as plt
 import random
-from UE import UE
 from UE_ris import UE_ris
 # TTT_range = [25, 50, 100, 200, 300, 400, 500]
 # HYSTERESIS_range = [0, 3, 5, 7, 10, 12, 15, 17, 20]
@@ -29,15 +28,19 @@ for i in range(100):
     TTT = 25
     environment.x = []
     print(i)
+    x = random.randint(0, 50000)
+    y = random.randint(0,1500)
+    print(f'%s, %s', x,y)
     print("RIS less...")
-    for HYSTERESIS in HYSTERESIS_range:
-        loc = random.randint(0,50000)
-        # environment.TTT = TTT
-        # environment.HYSTERESIS = HYSTERESIS
+    # for HYSTERESIS in HYSTERESIS_range:
+    #     
+    #     environment.TTT = TTT
+    #     environment.HYSTERESIS = HYSTERESIS
         # main.run_threads(TTT, HYSTERESIS)
         # environment.no_of_ho = 0
         # main.main(eNB_environments.eNBs_nr[1])
-        # main.run_threads(eNB_environments.eNBs_nr[1], TTT, HYSTERESIS, UE(loc), eNB_environments.eNBs_nr[0])
+        # main.run_threads_ris(
+            # eNB_environments.eNBs_nr[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(x, y))
         # print(environment.no_of_ho)
         # x.append(environment.no_of_ho)
         # h.append(HYSTERESIS)
@@ -55,7 +58,7 @@ for i in range(100):
         environment.TTT = TTT
         environment.HYSTERESIS = HYSTERESIS
         environment.no_of_ho = 0
-        main.run_threads_ris(eNB_environments.eNBs_nr_ris[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(loc), "RIS")
+        main.run_threads_ris(eNB_environments.eNBs_nr_ris[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(x, y))
     # plt.plot(HYSTERESIS_range, environment.x, color="blue")
         
         # print(environment.no_of_ho)

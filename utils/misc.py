@@ -1,6 +1,6 @@
+import math
 import sys
 sys.path.append("C:/Users/ekans/OneDrive/Desktop/OUR/ris")
-import math
 
 
 def freq_to_wavelength(frequency):
@@ -22,3 +22,6 @@ def gigahertz_to_megahertz(frequency):
     frequency = frequency * 1e3
     return frequency
 
+
+def calc_dist(x1, y1, x2, y2):
+    return math.sqrt((x1-x2)**2 + (y1-y2)**2)

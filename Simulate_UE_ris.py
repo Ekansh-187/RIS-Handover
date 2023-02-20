@@ -6,6 +6,7 @@ from UE_ris import UE_ris
 from eNB_ris import eNB_ris
 from utils.Result import Result
 from utils.Ticker import Ticker
+from utils.misc import calc_dist
 
 
 class Simulate_UE_ris:
@@ -34,7 +35,8 @@ class Simulate_UE_ris:
         nearby_ris = []
         associated_enb = self.ue.get_eNB()
         for ris in self.ris:
-            dist = math.fabs(associated_enb.get_location() - ris.get_location())
+            dist = calc_dist(associated_enb.x, associated_enb.y, ris.x, ris.y)
+            # dist = math.fabs(associated_enb.get_location()- ris.get_location())
             if dist <= 20000:
                 nearby_ris.append(ris)
         return nearby_ris
@@ -42,7 +44,8 @@ class Simulate_UE_ris:
     def search_for_bs(self):
         nearby_bs = []
         for e_nb in self.e_nbs:
-            dist = math.fabs(self.ue.get_location() - e_nb.get_location())
+            dist = calc_dist(e_nb.x, e_nb.y, self.ue.x, self.ue.y)
+            # dist = math.fabs(self.ue.get_location() - e_nb.get_location())
             if dist <= 20000:
                 nearby_bs.append(e_nb)
         return nearby_bs
@@ -63,7 +66,7 @@ class Simulate_UE_ris:
         if len(nearby_bs) == 0:
             print("UE %s is out of range" % self.ue.get_location())
             return Exception("UE is out of range")
-        sorted_nearby_bs = sorted(nearby_bs, key=lambda x: x.power_received(self.ue.get_location()), reverse=True)
+        sorted_nearby_bs = sorted(nearby_bs, key=lambda x: x.P_ris(self.ue.x, self.ue.y), reverse=True)
         self.ue.set_eNB(sorted_nearby_bs[0])
         self.associate_bs_with_ris(self.ue.get_eNB())
         # TODO: add a minimum RSRP threshold to consider
@@ -77,9 +80,10 @@ class Simulate_UE_ris:
                 self.check_handover_completion()
             self.ue.update_UE_location(self.Ticker)
             self.check_for_handover()
-        print("Successful HOs [nr2nr]: %s" %
+        print(self.ue.get_eNB())
+        print("Successful HOs: %s" %
               self.ue.get_HO_success())
-        print("Failed HOs [nr2nr]: %s" %
+        print("Failed HOs: %s" %
               self.ue.get_HO_failure())
         # if(self.ue.HO_total > 0):
         #     environment.x.append(self.ue.get_HO_success()[0]/self.ue.HO_total)
@@ -106,8 +110,8 @@ class Simulate_UE_ris:
                 if e_nb.get_id() != self.ue.get_eNB().get_id():
                     curr_enb = self.ue.get_eNB()
                     self.associate_bs_with_ris(e_nb)
-                    source_rsrp = curr_enb.P_ris(self.ue.get_location())
-                    target_rsrp = e_nb.power_received(self.ue.get_location())
+                    source_rsrp = curr_enb.P_ris(self.ue.x, self.ue.y)
+                    target_rsrp = e_nb.P_ris(self.ue.x, self.ue.y)
                     
                     if target_rsrp > source_rsrp + environment.HYSTERESIS:
                         if self.ho_active is False:
@@ -120,10 +124,11 @@ class Simulate_UE_ris:
         e_nb = self.ue.get_upcoming_eNB()
         self.associate_bs_with_ris(e_nb)
         # ris = self.ue.get_nearby_ris()[0]
-        target_rsrp = e_nb.power_received(self.ue.get_location())
+        
         # target_rsrp = self.ue.get_upcoming_eNB().power_received(self.ue.get_location())
-        if self.Ticker.time - self.ho_trigger_time >= environment.TTT:            
-            source_rsrp = self.ue.get_eNB().P_ris(self.ue.get_location())
+        if self.Ticker.time - self.ho_trigger_time >= environment.TTT:     
+            target_rsrp = e_nb.P_ris(self.ue.x, self.ue.y)
+            source_rsrp = self.ue.get_eNB().P_ris(self.ue.x, self.ue.y)
             if  target_rsrp > source_rsrp + environment.HYSTERESIS + environment.A3_OFFSET:
                 
                 self.ho_active = False
