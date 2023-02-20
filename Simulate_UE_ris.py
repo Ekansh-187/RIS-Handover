@@ -80,6 +80,7 @@ class Simulate_UE_ris:
                 self.check_handover_completion()
             self.ue.update_UE_location(self.Ticker)
             self.check_for_handover()
+        print("UE located at ",self.ue.x,",",self.ue.y)
         print(self.ue.get_eNB())
         print("Successful HOs: %s" %
               self.ue.get_HO_success())
@@ -152,5 +153,5 @@ class Simulate_UE_ris:
 
 
     def discover_bs(self):
-        self.e_nbs.sort(key=lambda x: x.get_location())
-        self.ris.sort(key=lambda x: x.get_location())
+        self.e_nbs.sort(key=lambda x: calc_dist(self.ue.x, self.ue.y, x.x, x.y))
+        # self.ris.sort(key=lambda x: x.get_location())

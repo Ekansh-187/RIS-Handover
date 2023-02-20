@@ -22,8 +22,8 @@ eNBs_nr = ("NR", [en1_1, en1_2, en1_3, en1_4, en1_5, en1_6, en1_7, en1_8, en1_9,
 
 
 en1_1 = ris(3000, random.randint(2000, 10000))
-en1_2 = ris(8000, random.randint(2000, 10000),)
-en1_3 = ris(17000, random.randint(2000, 10000),)
+en1_2 = ris(8000, random.randint(2000, 10000))
+en1_3 = ris(17000, random.randint(2000, 10000))
 
 # eNBs_mix1 = ("NR", [en1_1, en1_10])
 ris = ("ris", [en1_1,  en1_2, en1_3])

@@ -26,7 +26,7 @@ class eNB_ris:
         self.ris = None
 
     def __str__(self):
-        return "eNB located at %s of type: %s" % (self.location, self.bs_type)
+        return "eNB located at %s, %s of type: %s" % (self.x, self.y, self.bs_type)
 
     def get_location(self):
         return self.location
@@ -71,7 +71,7 @@ class eNB_ris:
             return self.power_received(ueX, ueY)
         pt = utils.misc.calc_power_in_dbm(environment.PTX)
         pr_at_ris = pt
-        dist = utils.misc.calc_dist(self.x, self.y, ueX, ueY)
+        dist = utils.misc.calc_dist(self.x, self.y, self.ris.x, self.ris.y)
         if (dist > 1):
             pr_at_ris /= dist
 

@@ -68,7 +68,7 @@ class UE_ris:
         return self.id
 
     def get_location(self):
-        return self.x, self.y
+        return self.location
     
     def get_location_2d(self):
         return self.x, self.y
@@ -148,29 +148,24 @@ class UE_ris:
     #     if constant == "vd":
     #         self.move()
 
-    def get_bs_ris_signal():
-        pass
 
-    def get_bs_signal():
-        pass
+    # def get_min_max_bounds(self):
+    #     """
+    #     This function returns the minimum and maximum bounds on the destination selection for waypoint mobility
+    #     """
+    #     if self.location < 1000:
+    #         min_bound = 0
+    #         max_bound = self.location + 1000
+    #     elif self.location > 49000:
+    #         max_bound = 50000
+    #         min_bound = self.location - 1000
+    #     else:
+    #         min_bound = self.location - 1000
+    #         max_bound = self.location + 1000
 
-    def get_min_max_bounds(self):
-        """
-        This function returns the minimum and maximum bounds on the destination selection for waypoint mobility
-        """
-        if self.location < 1000:
-            min_bound = 0
-            max_bound = self.location + 1000
-        elif self.location > 49000:
-            max_bound = 50000
-            min_bound = self.location - 1000
-        else:
-            min_bound = self.location - 1000
-            max_bound = self.location + 1000
-
-        return min_bound, max_bound
+    #     return min_bound, max_bound
     
-    def get_min_max_bounds_2d(self):
+    def get_min_max_bounds(self):
         if self.x < 1000:
             min_boundx = 0
             max_boundx = self.x + 1000
@@ -202,31 +197,31 @@ class UE_ris:
     def get_handover_type(self):
         return 3
 
-    # def update_UE_location(self, ticker: Ticker):
-    #     """
-    #     This function is responsible for random motion of the UE using the random waypoint model
-    #     """
-    #     # If it is time for the UE to start moving to the next destination, choose a new destination
-    #     if (fabs(self.location) >= fabs(self.waypoint) and self.direction == 1) or \
-    #             (fabs(self.location) <= fabs(self.waypoint) and self.direction == -1):
-    #         # Choose a new destination between 0 and 50000 meters
-    #         self.waypoint = random.uniform((self.get_min_max_bounds()[0]),
-    #                                        self.get_min_max_bounds()[1])
-    #         # Set the time at which the UE will start moving to the next destination
-    #         self.pause_time = random.randint(
-    #             environment.MIN_PAUSE, environment.MAX_PAUSE)
-    #         ticker.time = ticker.time + self.pause_time
-    #         # Choose a new random speed between 10 and 50 meters per second (m/s) equivalent to 0.01 and 0.05 m/ms
-    #         self.velocity = random.uniform(
-    #             environment.MIN_SPEED, environment.MAX_SPEED)
-    #         # Choose a new direction of movement based on the relative positions of the current location and the
-    #         # destination
-    #         if self.waypoint > self.location:
-    #             self.direction = 1  # Move forwards
-    #         else:
-    #             self.direction = -1  # Move backwards
-    #     # Update the UE's location based on its speed, direction, and the elapsed time
-    #     self.move(ticker)
+    def update_UE_location(self, ticker: Ticker):
+        """
+        This function is responsible for random motion of the UE using the random waypoint model
+        """
+        # If it is time for the UE to start moving to the next destination, choose a new destination
+        if (fabs(self.location) >= fabs(self.waypoint) and self.direction == 1) or \
+                (fabs(self.location) <= fabs(self.waypoint) and self.direction == -1):
+            # Choose a new destination between 0 and 50000 meters
+            self.waypoint = random.uniform((self.get_min_max_bounds()[0]),
+                                           self.get_min_max_bounds()[1])
+            # Set the time at which the UE will start moving to the next destination
+            self.pause_time = random.randint(
+                environment.MIN_PAUSE, environment.MAX_PAUSE)
+            ticker.time = ticker.time + self.pause_time
+            # Choose a new random speed between 10 and 50 meters per second (m/s) equivalent to 0.01 and 0.05 m/ms
+            self.velocity = random.uniform(
+                environment.MIN_SPEED, environment.MAX_SPEED)
+            # Choose a new direction of movement based on the relative positions of the current location and the
+            # destination
+            if self.waypoint > self.location:
+                self.direction = 1  # Move forwards
+            else:
+                self.direction = -1  # Move backwards
+        # Update the UE's location based on its speed, direction, and the elapsed time
+        self.move(ticker)
 
     def update_UE_location(self, ticker: Ticker):
         """
@@ -256,8 +251,8 @@ class UE_ris:
         if (fabs(self.y) >= fabs(self.waypointY) and self.diry == 1) or \
                 (fabs(self.y) <= fabs(self.waypointY) and self.diry == -1):
             # Choose a new destination between 0 and 50000 meters
-            self.waypointY = random.uniform((self.get_min_max_bounds_2d()[1]),
-                                            self.get_min_max_bounds_2d()[2])
+            self.waypointY = random.uniform((self.get_min_max_bounds()[2]),
+                                            self.get_min_max_bounds()[3])
             # Set the time at which the UE will start moving to the next destination
             self.pause_time = random.randint(
                 environment.MIN_PAUSE, environment.MAX_PAUSE)

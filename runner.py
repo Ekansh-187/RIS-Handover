@@ -28,19 +28,16 @@ for i in range(100):
     TTT = 25
     environment.x = []
     print(i)
-    x = random.randint(0, 50000)
+    x = random.randint(0, 5000)
     y = random.randint(0,1500)
     print(f'UE at x, y', x,y)
     print("RIS less...")
-    # for HYSTERESIS in HYSTERESIS_range:
-    #     
-    #     environment.TTT = TTT
-    #     environment.HYSTERESIS = HYSTERESIS
-        # main.run_threads(TTT, HYSTERESIS)
-        # environment.no_of_ho = 0
-        # main.main(eNB_environments.eNBs_nr[1])
-        # main.run_threads_ris(
-            # eNB_environments.eNBs_nr[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(x, y))
+    for HYSTERESIS in HYSTERESIS_range:
+        
+        environment.TTT = TTT
+        environment.HYSTERESIS = HYSTERESIS
+        main.run_threads_ris(
+            eNB_environments.eNBs_nr[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(x, y))
         # print(environment.no_of_ho)
         # x.append(environment.no_of_ho)
         # h.append(HYSTERESIS)
