@@ -2,7 +2,6 @@ import os
 import random
 import threading
 from typing import List
-from eNB import eNB
 from UE_ris import UE_ris
 import utils.Result
 from Simulate_UE_ris import Simulate_UE_ris
@@ -26,7 +25,7 @@ from utils.Ticker import Ticker
 def main_ris(lock_mutex: threading.Lock, enbs : List[eNB_ris], ris : List[ris], ttt, hys, u1 : UE_ris) -> utils.Result.Result:
     
     # print("ue: %s",u1.get_id())
-    enb2 = eNB(50000,random.randint(0,100), "nr")
+    enb2 = eNB_ris(50000,random.randint(0,100), "nr")
     ticker = Ticker()
     S = Simulate_UE_ris(u1, enbs, ris)
     res = S.run(ticker, time=10000000)

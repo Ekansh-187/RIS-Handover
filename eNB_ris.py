@@ -1,7 +1,6 @@
 import math
 from typing import List
 import random
-from eNB import eNB
 import environment
 import utils
 import utils.misc

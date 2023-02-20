@@ -30,7 +30,7 @@ for i in range(100):
     print(i)
     x = random.randint(0, 50000)
     y = random.randint(0,1500)
-    print(f'%s, %s', x,y)
+    print(f'UE at x, y', x,y)
     print("RIS less...")
     # for HYSTERESIS in HYSTERESIS_range:
     #     

@@ -1,5 +1,4 @@
 import random
-from eNB import eNB
 from ris import ris
 from eNB_ris import eNB_ris
 from utils.grapher import graph_rsrp
