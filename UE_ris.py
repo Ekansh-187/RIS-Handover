@@ -10,7 +10,7 @@ from utils.Ticker import Ticker
 class UE_ris:
     """Defines user entity in the environment"""
 
-    # def __init__(self, x, pause=100):
+    # def __init__(self, x, pause=1):
     #     self.direction = 1  # 0 - Towards 0, 1 - Away from
     #     self.nearby_bs = []
     #     self.HO_total = 0
@@ -21,12 +21,12 @@ class UE_ris:
     #     self.velocity = 0
     #     self.time_at_destination = 0
     #     self.location = x
-    #     self.id = random.randint(0, 1000)
+    #     self.id = random.randint(0, 10)
     #     self.pause_time = pause
     #     self.waypoint = x
     #     self.destinations = []
 
-    def __init__(self, x, y=0, pause=100):
+    def __init__(self, x, y=0, pause=1):
         self.direction = 1  # 0 - Towards 0, 1 - Away from
         self.nearby_bs = []
         self.nearby_ris = []
@@ -45,7 +45,7 @@ class UE_ris:
         self.velocityY = 0
         self.waypointX = x
         self.waypointY = y
-        self.id = random.randint(0, 1000)
+        self.id = random.randint(0, 10)
         self.pause_time = pause
         self.waypoint = x
         self.ris = None
@@ -117,7 +117,7 @@ class UE_ris:
     def move(self, ticker: Ticker):  # Move the UE in the environment per millisecond(default)
         x = self.direction * self.velocity * ticker.ticker_duration
         self.location += x
-        # if(x > 24000 or x < 0)
+        # if(x > 240 or x < 0)
         ticker.tick()
 
     
@@ -126,25 +126,25 @@ class UE_ris:
         max_boundx=0
         min_boundy=0
         max_boundy=0
-        if self.x < 1000:
-            min_boundx = 1000
-            max_boundx = self.x + 1000
-        elif self.x > 49000:
-            max_boundx = 50000
-            min_boundx = self.x - 1000
+        if self.x < 10:
+            min_boundx = 10
+            max_boundx = self.x + 10
+        elif self.x > 490:
+            max_boundx = 5
+            min_boundx = self.x - 10
         else:
-            min_boundx = self.x - 1000
-            max_boundx = self.x + 1000
+            min_boundx = self.x - 10
+            max_boundx = self.x + 10
 
-        if self.y < 1000:
+        if self.y < 10:
             min_boundy = 0
-            max_boundy = self.y + 1000
-        elif self.y > 4900:
-            max_boundy = 5000
-            min_boundy = self.y - 1000
+            max_boundy = self.y + 10
+        elif self.y > 49:
+            max_boundy = 50
+            min_boundy = self.y - 10
         else:
-            min_boundy = self.y - 1000
-            max_boundy = self.y + 1000
+            min_boundy = self.y - 10
+            max_boundy = self.y + 10
 
         return min_boundx, max_boundx, min_boundy, max_boundy
 
@@ -163,7 +163,7 @@ class UE_ris:
         flag1, flag2 = 0, 0
         if (fabs(self.x) >= fabs(self.waypointX) and self.dirx == 1) or \
                 (fabs(self.x) <= fabs(self.waypointX) and self.dirx == -1):
-            # Choose a new destination between 0 and 50000 meters
+            # Choose a new destination between 0 and 5 meters
             flag1 = 1                
             self.waypointX = random.uniform(self.get_min_max_bounds()[
                                             0], self.get_min_max_bounds()[1])
