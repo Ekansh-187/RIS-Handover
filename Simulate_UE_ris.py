@@ -36,8 +36,7 @@ class Simulate_UE_ris:
         associated_enb = self.ue.get_eNB()
         for ris in self.ris:
             dist = calc_dist(associated_enb.x, associated_enb.y, ris.x, ris.y)
-            # dist = math.fabs(associated_enb.get_location()- ris.get_location())
-            if dist <= 20000:
+            if dist <= 50000:
                 nearby_ris.append(ris)
         return nearby_ris
 
@@ -45,13 +44,11 @@ class Simulate_UE_ris:
         nearby_bs = []
         for e_nb in self.e_nbs:
             dist = calc_dist(e_nb.x, e_nb.y, self.ue.x, self.ue.y)
-            # dist = math.fabs(self.ue.get_location() - e_nb.get_location())
-            if dist <= 20000:
+            if dist <= 50000:
                 nearby_bs.append(e_nb)
         return nearby_bs
 
     def associate_bs_with_ris(self, enb):
-        # enb = self.ue.get_eNB()
         nearby_ris = self.search_for_ris()
         if(len(nearby_ris) == 0):
             return
@@ -69,8 +66,6 @@ class Simulate_UE_ris:
         sorted_nearby_bs = sorted(nearby_bs, key=lambda x: x.P_ris(self.ue.x, self.ue.y), reverse=True)
         self.ue.set_eNB(sorted_nearby_bs[0])
         self.associate_bs_with_ris(self.ue.get_eNB())
-        # TODO: add a minimum RSRP threshold to consider
-        # print sorted_nearby_bs with their RSRP
         self.ue.set_nearby_bs(nearby_bs)
         
 
@@ -80,16 +75,11 @@ class Simulate_UE_ris:
                 self.check_handover_completion()
             self.ue.update_UE_location(self.Ticker)
             self.check_for_handover()
-        print("UE located at ",self.ue.x,",",self.ue.y)
-        print(self.ue.get_eNB())
         print("Successful HOs: %s" %
               self.ue.get_HO_success())
         print("Failed HOs: %s" %
               self.ue.get_HO_failure())
-        # if(self.ue.HO_total > 0):
-        #     environment.x.append(self.ue.get_HO_success()[0]/self.ue.HO_total)
-        # else:
-        #     environment.x.append(0)
+        
         
         environment.x.append(self.ue.get_HO_success()[0])
         
@@ -99,10 +89,7 @@ class Simulate_UE_ris:
         """
         Handover occurs when the UE is in area of another base station with higher Pr for TTT
         """
-        # environment.pa.append(self.first.power_received(self.ue.get_location()))
-        # environment.pb.append(self.)
         nearby_bs = self.ue.get_nearby_bs()
-        nearby_ris = self.ue.get_nearby_ris()
         if len(nearby_bs) == 0:
             self.ue.set_HO_failure()
             print("UE %s is out of range" % self.ue.get_location())
@@ -119,39 +106,29 @@ class Simulate_UE_ris:
                             self.ho_active = True
                             self.ho_trigger_time = self.Ticker.time
                             self.ue.set_upcoming_eNB(e_nb)
-                            # print("UE %s is in area of eNB %s" % (ue.get_id(), e_nb.get_id()))
 
     def check_handover_completion(self):
         e_nb = self.ue.get_upcoming_eNB()
         self.associate_bs_with_ris(e_nb)
-        # ris = self.ue.get_nearby_ris()[0]
-        
-        # target_rsrp = self.ue.get_upcoming_eNB().power_received(self.ue.get_location())
-        if self.Ticker.time - self.ho_trigger_time >= environment.TTT:     
+
+        if self.Ticker.time - self.ho_trigger_time >= environment.TTT:
             target_rsrp = e_nb.P_ris(self.ue.x, self.ue.y)
             source_rsrp = self.ue.get_eNB().P_ris(self.ue.x, self.ue.y)
-            if  target_rsrp > source_rsrp + environment.HYSTERESIS + environment.A3_OFFSET:
-                
+            if target_rsrp > source_rsrp + environment.HYSTERESIS:
                 self.ho_active = False
-                self.ue.set_HO_success(self.ue.get_handover_type())
+                self.ue.set_HO_success()
                 self.ue.set_eNB(self.ue.get_upcoming_eNB())
                 environment.no_of_ho += 1 
-                # print("UE %s is connected to eNB %s" % (self.ue.get_id(), self.ue.get_eNB().get_id()))
                 
             else:
-                # print("ho failure")
                 self.ue.set_HO_failure()
                 self.ho_active = False
-            # if(self.ue.HO_total != 0):
-                # environment.ho_status.append(self.ue.HO_success[0]/self.ue.HO_total)
-            # else:
-            #     environment.ho_status.append(0)
-            # environment.rsrp.append(math.log10(target_rsrp))
             self.ue.set_upcoming_eNB(None)
             self.ho_trigger_time = -1
             self.associate_ue_with_bs()
+        else:
+            return
 
 
     def discover_bs(self):
         self.e_nbs.sort(key=lambda x: calc_dist(self.ue.x, self.ue.y, x.x, x.y))
-        # self.ris.sort(key=lambda x: x.get_location())

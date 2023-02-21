@@ -9,17 +9,6 @@ from ris import ris
 from eNB_ris import eNB_ris
 from utils.Ticker import Ticker
 
-# def main(enbs : List[eNB]) -> utils.Result.Result:
-    
-#     u1 = UE(0)
-#     ticker = Ticker()
-#     S = Simulate_UE(u1, enbs)
-#     res = S.run(ticker, time=10000000)
-#     file_name = "Results/results_corrected.xlsx"
-#     file_name = os.path.join(os.path.dirname(__file__), file_name)
-#     return res
-
-
 # Define the number of threads to run
 
 def main_ris(lock_mutex: threading.Lock, enbs : List[eNB_ris], ris : List[ris], ttt, hys, u1 : UE_ris) -> utils.Result.Result:
