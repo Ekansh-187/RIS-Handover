@@ -36,23 +36,21 @@ class Result:
     def get_total_failure(self):
         return sum(self.failure)
 
-    def save_to_file(self, file_name: str, environment: str, time_to_trigger: int, hysteresis: int, e_nb_location, type : str):
+    def save_to_file(self, file_name: str, time_to_trigger: int, hysteresis: int, e_nb_location: tuple):
         # Check if the file exists
         if not os.path.exists(file_name):
             print("File does not exist, creating new file")
             # Create a new workbook and add a header row
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            sheet.cell(row=1, column=1).value = "Environment"
-            sheet.cell(row=1, column=2).value = "Time of execution"
-            sheet.cell(row=1, column=3).value = "Time To Trigger"
-            sheet.cell(row=1, column=4).value = "Hysteresis"
-            sheet.cell(row=1, column=5).value = "A3 Offset"
-            sheet.cell(row=1, column=6).value = "e_nb_location"
-            sheet.cell(row=1, column=7).value = "Failed HOs"
-            sheet.cell(row=1, column=8).value = "Successful HOs"
-            sheet.cell(row=1, column=9).value = "Total HOs"
-            sheet.cell(row=1, column=10).value = "type"
+            sheet.cell(row=1, column=1).value = "Time of execution"
+            sheet.cell(row=1, column=2).value = "Time To Trigger"
+            sheet.cell(row=1, column=3).value = "Hysteresis"
+            sheet.cell(row=1, column=4).value = "e_nb_location_X"
+            sheet.cell(row=1, column=5).value = "e_nb_location_Y"
+            sheet.cell(row=1, column=6).value = "Failed HOs"
+            sheet.cell(row=1, column=7).value = "Successful HOs"
+            sheet.cell(row=1, column=8).value = "Total HOs"
         else:
             # Load the existing workbook
             workbook = openpyxl.load_workbook(file_name)
@@ -62,19 +60,17 @@ class Result:
         next_row = sheet.max_row + 1
 
         # Write the TTT and HYSTERESIS to the sheet
-        sheet.cell(row=next_row, column=1).value = environment
-        sheet.cell(row=next_row, column=2).value = self.timeOfExecution
-        sheet.cell(row=next_row, column=3).value = time_to_trigger
-        sheet.cell(row=next_row, column=4).value = hysteresis
-        sheet.cell(row=next_row, column=5).value = A3_OFFSET
+        sheet.cell(row=next_row, column=1).value = self.timeOfExecution
+        sheet.cell(row=next_row, column=2).value = time_to_trigger
+        sheet.cell(row=next_row, column=3).value = hysteresis
 
         # Write the total success and total failure to the sheet
         # sheet.cell(row=next_row, column=6).value = (self.rsrp)
-        sheet.cell(row=next_row, column=6).value = (e_nb_location)
-        sheet.cell(row=next_row, column=7).value = (self.get_total_failure())
-        sheet.cell(row=next_row, column=8).value = (self.get_total_success())
-        sheet.cell(row=next_row, column=9).value = (self.get_total_ho())
-        sheet.cell(row=next_row, column=10).value = (type)
+        sheet.cell(row=next_row, column=4).value = (e_nb_location[0])
+        sheet.cell(row=next_row, column=4).value = (e_nb_location[1])
+        sheet.cell(row=next_row, column=6).value = (self.get_total_failure())
+        sheet.cell(row=next_row, column=7).value = (self.get_total_success())
+        sheet.cell(row=next_row, column=8).value = (self.get_total_ho())
 
         # Save the workbook
         workbook.save(file_name)

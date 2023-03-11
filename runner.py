@@ -4,7 +4,7 @@ import random
 from UE_ris import UE_ris
 # TTT_range = [25, 50, 100, 200, 300, 400, 500]
 # HYSTERESIS_range = [0, 3, 5, 7, 10, 12, 15, 17, 20]
-HYSTERESIS_range = [0.5*x for x in range(10)]
+HYSTERESIS_range = [0.2*x for x in range(15)]
 TTT_range = [25]
 # HYSTERESIS_range = [5]
 
@@ -25,19 +25,19 @@ fig = plt.plot()
 plt.ylabel("HO rate")
 plt.xlabel("Hysteresis")
 for i in range(100):
-    TTT = 25
+    TTT = 100
     environment.x = []
     print(i)
     x = random.randint(0, 5)
     y = random.randint(0,5)
     print(f'UE at x, y', x,y)
-    print("RIS less...")
+    '''print("RIS less...")
     for HYSTERESIS in HYSTERESIS_range:
         
         environment.TTT = TTT
         environment.HYSTERESIS = HYSTERESIS
         main.run_threads_ris(
-            eNB_environments.eNBs_nr[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(x, y))
+            eNB_environments.eNBs_nr[1], eNB_environments.ris[1], TTT, HYSTERESIS, UE_ris(x, y))'''
        
     
 

@@ -17,12 +17,12 @@ def main_ris(lock_mutex: threading.Lock, enbs : List[eNB_ris], ris : List[ris], 
     S = Simulate_UE_ris(u1, enbs, ris)
     res = S.run(ticker, time=10000000)
     lock_mutex.acquire()
-    # try:
-    #     file_name = "Results/results_corrected.xlsx"
-    #     file_name = os.path.join(os.path.dirname(__file__), file_name)
-    #     utils.Result.Result.save_to_file(res, file_name, "nr", ttt, hys, u1.get_eNB().location, bs)
-    # finally:
-    #     lock_mutex.release()
+    try:
+        file_name = "Results/results_corrected.xlsx"
+        file_name = os.path.join(os.path.dirname(__file__), file_name)
+        utils.Result.Result.save_to_file(res, file_name, ttt, hys, u1.get_eNB().get_location_2d())
+    finally:
+        lock_mutex.release()
     return res
 
 

@@ -1,7 +1,8 @@
 import random
 from math import fabs
 from typing import List
-
+import numpy as np
+from utils.misc import pause_probability_init, initial_speed, residual_time, calc_dist
 import environment
 from eNB_ris import eNB_ris
 from utils.Ticker import Ticker
@@ -41,6 +42,7 @@ class UE_ris:
         self.y = y
         self.dirx = 1
         self.diry = 1
+        self.velocity=0
         self.velocityX = 0
         self.velocityY = 0
         self.waypointX = x
@@ -121,16 +123,16 @@ class UE_ris:
         ticker.tick()
 
     
-    def get_min_max_bounds(self):
+    '''def get_min_max_bounds(self):
         min_boundx = 0
         max_boundx=0
         min_boundy=0
         max_boundy=0
         if self.x < 10:
-            min_boundx = 10
+            min_boundx = 0
             max_boundx = self.x + 10
         elif self.x > 490:
-            max_boundx = 5
+            max_boundx = 500
             min_boundx = self.x - 10
         else:
             min_boundx = self.x - 10
@@ -139,22 +141,57 @@ class UE_ris:
         if self.y < 10:
             min_boundy = 0
             max_boundy = self.y + 10
-        elif self.y > 49:
+        elif self.y > 40:
             max_boundy = 50
             min_boundy = self.y - 10
         else:
             min_boundy = self.y - 10
             max_boundy = self.y + 10
 
-        return min_boundx, max_boundx, min_boundy, max_boundy
+        return min_boundx, max_boundx, min_boundy, max_boundy'''
+    def get_min_max_bounds(self):
+        min_boundx = 0
+        max_boundx=0
+        if self.x < 10:
+            min_boundx = 0
+            max_boundx = self.x + 10
+        elif self.x > 40:
+            max_boundx = 50
+            min_boundx = self.x - 10
+        else:
+            min_boundx = self.x - 10
+            max_boundx = self.x + 10
+
+        return min_boundx, max_boundx
 
     def move_2d(self, ticker: Ticker):  # Move the UE in the environment per millisecond(default)
         self.x += (self.dirx * self.velocityX * ticker.ticker_duration)
-        self.y += self.diry * self.velocityY * ticker.ticker_duration
+        # self.y += self.diry * self.velocityY * ticker.ticker_duration
         ticker.tick()
 
 
+    def update_UE_location(self, ticker: Ticker):
+        # If it is time for the UE to start moving to the next destination, choose a new destination
+        flag1, flag2 = 0, 0
+        
+        if (fabs(self.x) >= fabs(self.waypointX) and self.dirx == 1) or \
+                (fabs(self.x) <= fabs(self.waypointX) and self.dirx == -1):
+                     
+            self.waypointX = random.uniform(self.get_min_max_bounds()[
+                                            0], self.get_min_max_bounds()[1])
+            self.velocityX = random.uniform(
+                    environment.MIN_SPEED, environment.MAX_SPEED)
+            if self.waypointX > self.x:
+                self.dirx = 1  
+            else:
+                self.dirx = -1 
+            
+            self.pause_time = random.randint(
+                    environment.MIN_PAUSE, environment.MAX_PAUSE)
+            ticker.time = ticker.time + self.pause_time            
+        self.move_2d(ticker)
 
+    '''
     def update_UE_location(self, ticker: Ticker):
         """
         This function is responsible for random motion of the UE using the random waypoint model
@@ -198,5 +235,10 @@ class UE_ris:
             self.pause_time = random.randint(
                     environment.MIN_PAUSE, environment.MAX_PAUSE)
             ticker.time = ticker.time + self.pause_time
-        self.move_2d(ticker)
+        self.move_2d(ticker)'''
+    
+
+        
+    
+
 
